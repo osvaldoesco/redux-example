@@ -1,43 +1,69 @@
-import React, { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React from 'react';
+import { connect } from 'react-redux';
 
 import { 
   fetchError,
   fetchRequest,
   fetchSuccess
 } from '../../actions/pokemon.action';
-import { fetchPokemonList } from '../../api/pokemon.api';
+import { fetchPokemonListApi  } from '../../api/pokemon.api';
 import PokemonListComponent  from '../../components/pokemons/PokemonList';
 
-function PokemonList() {
+class  PokemonList extends React.Component {
+  constructor(props){
+    super(props);
+    this.state = {
+      some: 'some',
+    }
+  }
 
-  const dispatch = useDispatch();
-  const {list: pokeCards, error, loading } = useSelector(({pokemons}) => pokemons);
-
-  useEffect(() => {
-    dispatch(fetchRequest());
-    fetchPokemonList()
+  componentDidMount(){
+    const { 
+      fetchPokemonList, 
+      fetchPokemonListSuccess,
+      fetchPokemonListError, 
+    } = this.props;
+    fetchPokemonList();
+    fetchPokemonListApi()
       .then((response) => {
-        console.log('list', response);
-        dispatch(fetchSuccess(response.cards));
+        fetchPokemonListSuccess(response.cards);
       })
       .catch(err => {
-        dispatch(fetchError());
-        console.log('err', err);
+        fetchPokemonListError();
       });
-  }, [dispatch]);
+  }
 
-  return (
-    <div className="row">
-      <div className="col-md-12 text-center">
-        <PokemonListComponent 
-          error={error} 
-          loading={loading}
-          pokeCards={pokeCards}/>
+  render() {
+    const { error, loading, pokeCards } = this.props;
+    return (
+      <div className="row">
+        <div className="col-md-12 text-center">
+          <PokemonListComponent 
+            error={error} 
+            loading={loading}
+            pokeCards={pokeCards}/>
+        </div>
       </div>
-    </div>
-    
-  );
+    );
+  }
+  
 }
 
-export default PokemonList;
+const mapDispatchToProps = dispatch => {
+  return {
+    fetchPokemonList: () => dispatch(fetchRequest()),
+    fetchPokemonListSuccess: (list) =>  dispatch( fetchSuccess(list)),
+    fetchPokemonListError: () =>  dispatch(fetchError()),
+  }
+}
+
+const mapStateToProps = (state) =>{
+  const {error, loading, list} = state.pokemons;
+  return {
+    error,
+    loading,
+    pokeCards: list
+  }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(PokemonList);
