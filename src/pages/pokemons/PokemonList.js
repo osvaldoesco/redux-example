@@ -2,11 +2,8 @@ import React from 'react';
 import { connect } from 'react-redux';
 
 import { 
-  fetchError,
   fetchRequest,
-  fetchSuccess
 } from '../../actions/pokemon.action';
-import { fetchPokemonListApi  } from '../../api/pokemon.api';
 import PokemonListComponent  from '../../components/pokemons/PokemonList';
 
 class  PokemonList extends React.Component {
@@ -20,17 +17,9 @@ class  PokemonList extends React.Component {
   componentDidMount(){
     const { 
       fetchPokemonList, 
-      fetchPokemonListSuccess,
-      fetchPokemonListError, 
     } = this.props;
     fetchPokemonList();
-    fetchPokemonListApi()
-      .then((response) => {
-        fetchPokemonListSuccess(response.cards);
-      })
-      .catch(err => {
-        fetchPokemonListError();
-      });
+  
   }
 
   render() {
@@ -52,8 +41,6 @@ class  PokemonList extends React.Component {
 const mapDispatchToProps = dispatch => {
   return {
     fetchPokemonList: () => dispatch(fetchRequest()),
-    fetchPokemonListSuccess: (list) =>  dispatch( fetchSuccess(list)),
-    fetchPokemonListError: () =>  dispatch(fetchError()),
   }
 }
 
